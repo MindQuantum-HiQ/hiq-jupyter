@@ -5,7 +5,8 @@ const babelSettings = {
   plugins: [
     'add-module-exports',
     'transform-regenerator',
-	'babel-plugin-transform-class-properties'
+	'babel-plugin-transform-class-properties',
+	'transform-decorators-legacy',
   ],
   presets: [ 'env', 'stage-1', 'react' ]
 };
@@ -20,7 +21,7 @@ module.exports = [
       entry: './src/index.js',
       output: {
           filename: 'index.js',
-          path: '/Huawei/jupyter-react-example-master/example/static',
+          path: '/Huawei/jupyter-react-example-master/qcircuit/static',
           libraryTarget: 'umd'
       },
       module : {
