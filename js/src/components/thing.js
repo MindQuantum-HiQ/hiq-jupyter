@@ -121,7 +121,15 @@ class QuantumCircuit extends React.PureComponent {
     this.initInteractForExistingBlocks()
 
     this.initStateFromBlockData()
+
     this.props.comm.on_msg(this.commMessagesHandler)
+
+    if (this.props.cell && this.props.cell._metadata._hiq_info.qregs) {
+        this.forceUpdate(() => {
+            this.makeCircuitTransitionOnQregsChanged(this._inited_from_qreg_data, this.props.cell._metadata._hiq_info.qregs)
+        })
+    }
+
     this.demandSaveChanges()
   }
 
@@ -140,6 +148,8 @@ class QuantumCircuit extends React.PureComponent {
   initQreg = (qregsData) => {
     if (!qregsData) qregsData = this.props.qregs
 
+    this._inited_from_qreg_data = qregsData
+
     if (qregsData) {
         var qregs = []
 
@@ -155,6 +165,93 @@ class QuantumCircuit extends React.PureComponent {
 
       this.setState({ qregs })
     }
+  }
+
+  makeCircuitTransitionOnQregsChanged = (newQregsData, oldQregsData) => {
+    let line2line = {}
+    let curOldLine = 0
+
+    console.log('old=', oldQregsData, ' new=', newQregsData)
+
+    oldQregsData.forEach((oldReg, ind) => {
+        let matchedRegInd = -1
+        newQregsData.forEach((newReg, newInd) => {
+            if (oldReg.name == newReg.name && oldReg.type == newReg.type) {
+                matchedRegInd = newInd
+            }
+        })
+
+        console.log('matchedRegInd=',matchedRegInd)
+        if (matchedRegInd == -1) {
+            if (oldReg.type == 'QUREG') {
+                for (let i = 0; i < oldReg.size; i++) {
+                    line2line[curOldLine] = -1
+                    curOldLine++;
+                }
+            } else {
+                line2line[curOldLine] = -1
+                curOldLine++;
+            }
+        } else {
+            const newReg = newQregsData[matchedRegInd]
+
+            if (oldReg.type == 'QUREG') {
+                let n = Math.min(oldReg.size, newReg.size)
+                let startNewInd = -1
+
+                this.state.qregs.forEach((q, ind) => {
+                    if (startNewInd == -1 && q.name == oldReg.name + "[0]") {
+                        startNewInd = ind
+                    }
+                })
+
+                if (startNewInd != -1) {
+                    for (let i = 0; i < n; i++) {
+                        line2line[curOldLine] = startNewInd + i
+                        curOldLine++;
+                    }
+                } else {
+                    n = 0
+                }
+
+                for (let i = n; i < oldReg.size; i++) {
+                    line2line[i] = -1
+                    curOldLine++;
+                }
+            } else {
+                let startNewInd = -1
+                this.state.qregs.forEach((q, ind) => {
+                    if (startNewInd == -1 && q.name == oldReg.name) {
+                        startNewInd = ind
+                    }
+                })
+
+                line2line[curOldLine] = startNewInd
+                curOldLine++
+            }
+        }
+    })
+
+    let newBlocks = []
+    this.state.blocks.forEach(block => {
+        let newBlock = {...block}
+        if (line2line[newBlock.pos[1] /* y */] == -1) return
+
+        newBlock.pos[1] = line2line[newBlock.pos[1] /* y */]
+
+        newBlock.ctrls = []
+        block.ctrls.forEach(ctrl => {
+            if (line2line[ctrl] != -1) {
+                newBlock.ctrls.push(line2line[ctrl])
+            }
+        })
+
+        newBlocks.push(newBlock)
+    })
+
+    console.log('newBlocks=', newBlocks)
+
+    this.setState({ blocks: newBlocks })
   }
 
   updateBlocksByTransitionMap = (regTransition) => {
@@ -215,6 +312,9 @@ class QuantumCircuit extends React.PureComponent {
 
   initStateFromBlockData = (circuitData) => {
   	var blocks = []
+
+  	console.log('metadata:', this.props.cell._metadata._hiq_info)
+  	if (this.props.cell._metadata._hiq_info.qschema) circuitData = this.props.cell._metadata._hiq_info.qschema
 
   	if (!circuitData) circuitData = this.props.circuit;
 //    console.log(this.props.block.toJSON())
@@ -1073,6 +1173,9 @@ class QuantumCircuit extends React.PureComponent {
 	  })
 
   	  this.props.comm.send({ action: 'save_schema', qschema: result });
+  	  this.props.cell._metadata._hiq_info.qschema = result
+  	  this.props.cell._metadata._hiq_info.qregs = this._inited_from_qreg_data
+  	  console.log('saved metadata:', this.props.cell._metadata)
 
 	  return result
   }

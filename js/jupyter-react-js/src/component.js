@@ -13,8 +13,8 @@ class Component extends React.Component {
       renderProps: null,//{ ...props, ...comm_msg.content.data }
     };
 	
-	console.log('PROPS');
-	console.log(props)
+	console.log('PROPS:', props);
+	
     props.comm.on_msg( this.handleMsg );
   }
 
@@ -24,32 +24,32 @@ class Component extends React.Component {
    */
   handleMsg( msg ) {
 	  
-    const { comm_msg, save } = this.props;
+    const { comm_msg, save, additional } = this.props;
 	console.log('handled Msg:', msg)
     const { method, props = {} } = msg.content.data;
     if ( method === "update" ) {
       if ( this.props.on_update ) {
-        return this.props.on_update( comm_msg.content.data.module, props, msg.content.comm_id);
+        return this.props.on_update( comm_msg.content.data.module, props, msg.content.comm_id, ...additional);
       }
-      this.setState( { renderProps: { ...props, ...comm_msg.content.data } } );
+      this.setState( { renderProps: { ...props, ...comm_msg.content.data, ...additional } } );
     } else if ( method === "display" ) {
       console.log('method === "display"', msg, comm_msg, save )
       if ( save ) {
         this._save( msg, comm_msg.content.comm_id, () => {
-          this.setState( { renderProps: { ...props, ...comm_msg.content.data } } );
+          this.setState( { renderProps: { ...props, ...comm_msg.content.data, ...additional } } );
         } );
       } else {
-        this.setState( { renderProps: { ...props, ...comm_msg.content.data } } );
+        this.setState( { renderProps: { ...props, ...comm_msg.content.data, ...additional } } );
       }
     } else if (msg.content.data.action == "set_circuit") {
-		this.setState( { renderProps: { ...props, ...msg.content.data } } );
+		this.setState( { renderProps: { ...props, ...msg.content.data, ...additional } } );
 	}
   }
 
   // saves the index of the cell to the notebook metadata
   // useful for components that want to re-render on page refresh
   _save( msg, comm_id, done ) {
-	  console.log('_save:', msg, comm_id)
+	console.log('_save:', msg, comm_id)
     const cell = this._getMsgCell( msg );
     const md = Jupyter.notebook.metadata;
     if ( cell ) {
@@ -60,6 +60,11 @@ class Component extends React.Component {
 		  cellIdx: this._getCellIndex( cell.cell_id ) + '', 
 		  msg: msg
 	  };
+	  
+	  if (!cell._metadata._hiq_info) cell._metadata._hiq_info = {}
+	  cell._metadata._hiq_info = {...cell._metadata._hiq_info,
+		  msg, comm_id,
+	  }
     }
     done();
   }

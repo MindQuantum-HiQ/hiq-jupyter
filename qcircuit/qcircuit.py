@@ -76,6 +76,7 @@ class QCircuit(Component):
         self._last_msg = msg
         if msg['content']['data']['action'] == 'redisplay':
             self.setCircuit(self.current_schema)
+
         elif msg['content']['data']['action'] == 'save_schema':
             self.current_schema = msg['content']['data']['qschema']
 

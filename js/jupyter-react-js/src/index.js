@@ -35,8 +35,8 @@ function init( Jupyter, events, commTarget, componentParams ) {
         if ( msg[ 'msg_type' ] === 'comm_open' ) {
           const msg_id = msg.parent_header.msg_id;
           const cell = Jupyter.notebook.get_msg_cell( msg_id );
-          const component = React.createElement( Component,  { ...componentParams, comm, comm_msg: msg } );
-		  console.log('handle_kernel:', { ...componentParams, comm, comm_msg: msg })
+          const component = React.createElement( Component,  { ...componentParams, comm, comm_msg: msg, additional: { cell } } );
+		  console.log('handle_kernel:', { ...componentParams, comm, comm_msg: msg, additional: { cell } })
           if ( !componentParams.element ) {
             createOutputArea( cell, commTarget );
             if ( cell.react_output && cell.react_output[ commTarget ] ) {
@@ -49,7 +49,7 @@ function init( Jupyter, events, commTarget, componentParams ) {
       });
 
       // find any open comms and render components 
-      kernel.comm_info( commTarget, commInfo => {
+      false && kernel.comm_info( commTarget, commInfo => {
         const comms = Object.keys( commInfo[ 'content' ][ 'comms' ] );
         const md = Jupyter.notebook.metadata;
 		console.log('commInfo, md.react_comms', commInfo[ 'content' ][ 'comms' ], md.react_comms)
@@ -83,6 +83,36 @@ function init( Jupyter, events, commTarget, componentParams ) {
         }
 	
     })
+	
+	console.log(Jupyter.notebook.get_cells())
+	
+	kernel.comm_info( commTarget, commInfo => {
+		
+		Jupyter.notebook.get_cells().forEach( cell => {
+			
+			const comm_id = cell._metadata._hiq_info && cell._metadata._hiq_info.comm_id
+			if (!comm_id) return
+			
+			const module = comm_id.split( '.' ).slice( -1 )[ 0 ];
+			const newComm = new Comm.Comm( commTarget, comm_id );
+			kernel.comm_manager.register_comm( newComm );
+
+			createOutputArea( cell, commTarget );
+			
+			//console.log({ ...componentParams, comm: newComm, comm_msg: { content: { data: { module } } } })
+			console.log('Running on start:', cell, { ...componentParams, comm: newComm, comm_msg: { content: { data: { module } } } },
+					cell.react_output[ commTarget ])
+
+			const component = React.createElement( Component, { ...componentParams, comm: newComm, comm_msg: { content: { data: { module } } }, additional: { cell } } );
+			ReactDom.render( component, cell.react_output[ commTarget ].subarea );
+			
+			setTimeout(() => {
+			newComm.send({action: 'redisplay'})
+			}, 1000)
+
+		}) 
+    })
+	
     };
 
     // On new kernel session create new comm managers
