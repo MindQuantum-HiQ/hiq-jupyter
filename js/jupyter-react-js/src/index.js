@@ -93,6 +93,8 @@ function init( Jupyter, events, commTarget, componentParams ) {
 			const comm_id = cell._metadata._hiq_info && cell._metadata._hiq_info.comm_id
 			if (!comm_id) return
 			
+			if (!commInfo[ 'content' ][ 'comms' ][comm_id]) return
+			
 			const module = comm_id.split( '.' ).slice( -1 )[ 0 ];
 			const newComm = new Comm.Comm( commTarget, comm_id );
 			kernel.comm_manager.register_comm( newComm );
