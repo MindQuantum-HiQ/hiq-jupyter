@@ -1,14 +1,14 @@
 from __future__ import print_function
 from jupyter_react import Component
-from projectq.ops import X, H, Measure
+from projectq.ops import X, Y, Z, S, Rx, Ry, Rz, H, Measure, Swap, SqrtSwap
 from projectq.meta import Control
 from .constants import Classic, Qureg, Qubit
+from IPython.display import display
 
 class QCircuit(Component):
     module = 'QCircuit'
 
     def __init__(self, **kwargs):
-        print('inited')
         #data = [[""], ["X"], ["","","","X","","M"],["","","","","H"],["","Y"]]
         #super(QCircuit, self).__init__(target_name='qcircuit', **kwargs)
 
@@ -36,7 +36,7 @@ class QCircuit(Component):
             elif value == Qubit:
                 data = {
                     "name": name,
-                    "type": "QUBIT",
+                    "type": "QUANTUM",
                 }
                 qregs.append(data)
                 self._expanded_qregs.append(data)
@@ -67,21 +67,40 @@ class QCircuit(Component):
         self.run(eng, *args, **kwargs)
 
     def set(self, row, col, gateEncoded):
-        self.send({"action": "set_gate", "row": row, "col": col, "gateEncoded": gateEncoded});
+        self.send({"action": "set_gate", "row": row, "col": col, "gateEncoded": gateEncoded})
 		
     def setCircuit(self, circuit):
-        self.send({"action": "set_circuit", "circuit": circuit});
+        self.send({"action": "set_circuit", "circuit": circuit, "qregs": self.qregs})
 		
     def _handle_msg(self, msg):
         self._last_msg = msg
-        self.current_schema = msg['content']['data']['qschema']
+        if msg['content']['data']['action'] == 'redisplay':
+            self.setCircuit(self.current_schema)
+
+        elif msg['content']['data']['action'] == 'save_schema':
+            self.current_schema = msg['content']['data']['qschema']
 
     def run(self, eng, *args, **kwargs):
-        gates = {"X": X, "H": H, "M": Measure}
+        gates = {
+            "X": X,
+            "Y": Y,
+            "Z": Z,
+            "Rx": Rx,
+            "Ry": Ry,
+            "Rz": Rz,
+            "H": H,
+            "M": Measure,
+            "Swap": Swap,
+            "SqrtSwap": SqrtSwap,
+        }
 
         name2obj = kwargs
         for i, obj in enumerate(args):
             name2obj[self.qregs[i]["name"]] = obj
+            print(self.qregs[i]["name"])
+
+        print(len(args))
+
 
         schema_len = 0
         for line in self.current_schema:
@@ -118,5 +137,9 @@ class QCircuit(Component):
                         resolved_ctrls.append(ctrl_obj)
                     print("Debug: ", gate, " with Control(", ctrls, ")")
 
-                    with Control(eng, *resolved_ctrls):
+                    with Control(eng, resolved_ctrls):
                         gate_op | op_subject
+
+    def display(self):
+        self.send({"action": "pre_display"});
+        display(self)
