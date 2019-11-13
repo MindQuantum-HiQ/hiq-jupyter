@@ -3,9 +3,8 @@
 ## Installation
 
 1. Clone repository and go inside
-2. For Windows: run Anaconda in administrator mode (because plug-in requires access to "C:\ProgramData\jupyter\nbextensions")
-3. Run `python ./setup.py install`
-4. Run `python ./setup.py develop`
+2. Run `python ./setup.py install --user`
+3. Run `python ./setup.py develop --user`
 
 ## Usage
 

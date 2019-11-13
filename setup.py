@@ -10,7 +10,7 @@ class develop(_develop):
     def run(self):
         _develop.run(self)
         install_nbextension(extension_dir, symlink=True,
-                            overwrite=True, user=False, destination="qcircuit")
+                            overwrite=True, user=True, destination="qcircuit")
         cm = ConfigManager()
         cm.update('notebook', {"load_extensions": {"qcircuit/index": True } })
 
