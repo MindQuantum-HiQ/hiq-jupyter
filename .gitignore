@@ -1,2 +1,8 @@
 js/node_modules
 **/*.pyc
+.idea
+.ipynb_checkpoints
+build
+dist
+qcircuit.egg-info
+
