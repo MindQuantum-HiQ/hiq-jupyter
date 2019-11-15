@@ -21,6 +21,12 @@ class QCircuit(Component):
         self.on_msg(self._handle_msg)
         self.current_schema = [None] * len(self._expanded_qregs)
 
+    @staticmethod
+    def create(**kwargs):
+        o = QCircuit(**kwargs)
+        o.display()
+        return o
+
     def _generate_qregs(self, **kwargs):
         qregs = []
         self._expanded_qregs = []
