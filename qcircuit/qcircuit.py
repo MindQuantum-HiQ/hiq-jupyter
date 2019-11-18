@@ -27,6 +27,10 @@ class QCircuit(Component):
         o.display()
         return o
 
+    @staticmethod
+    def alloc():
+        return 'ALLOC_STUB'
+
     def _generate_qregs(self, **kwargs):
         qregs = []
         self._expanded_qregs = []
@@ -100,13 +104,16 @@ class QCircuit(Component):
             "SqrtSwap": SqrtSwap,
         }
 
-        name2obj = kwargs
+        name2obj = dict(kwargs)
         for i, obj in enumerate(args):
             name2obj[self.qregs[i]["name"]] = obj
-            print(self.qregs[i]["name"])
+#            print(self.qregs[i]["name"])
 
-        print(len(args))
+#        print(len(args))
 
+        if (len(args) == 3):
+            print(name2obj['b1'])
+            print(args[1])
 
         schema_len = 0
         for line in self.current_schema:
@@ -139,9 +146,12 @@ class QCircuit(Component):
                             ctrl_obj = name2obj[exp_qreg['name']][exp_qreg['index']]
                         else:
                             ctrl_obj = name2obj[exp_qreg['name']]
+                            if exp_qreg['name']=='b1':
+                                ctrl_obj = name2obj.get('b1')
 
                         resolved_ctrls.append(ctrl_obj)
-                    print("Debug: ", gate, " with Control(", ctrls, ")")
+                    print(name2obj, exp_qreg['name'], ctrl_obj)
+                    print("Debug: ", gate, " with Control(", ctrls, ")", ctrl_obj)
 
                     with Control(eng, resolved_ctrls):
                         gate_op | op_subject
