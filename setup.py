@@ -32,5 +32,10 @@ setup(name='qcircuit',
       install_requires=[
           "ipython",
           "jupyter-react"
+        ],
+      entry_points={
+        'nbconvert.exporters': [
+            'qcircuit = qcircuit:QExporter',
         ]
-      )
+      }
+)
