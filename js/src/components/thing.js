@@ -933,7 +933,7 @@ class QuantumCircuit extends React.PureComponent {
         palette.map((paletteLine, lineNum) =>
           paletteLine.filter(blockType => !isQControl || blockType != 'Measure').map((blockType, blockColNum) =>
             <svg className="draggable" key={this.state.randomSeed + lineNum + "_" + blockColNum}
-              style={{position: 'absolute', top: 10 + lineNum * 50, left: 10 + blockColNum * 50, width: 50, height: 50, zIndex: 1000}}
+              style={{position: 'absolute', top: 10 + lineNum * 50, left: 10 + blockColNum * 50, width: 50, height: 50, zIndex: 99}}
               viewBox="0 0 48.876 48.876" data-block-type={blockType}>
               <g transform="matrix(1,0,0,1,5,5)">
                 {blocksJSX[blockType]({})}
@@ -1215,7 +1215,7 @@ class QuantumCircuit extends React.PureComponent {
             height: 100,
             left: x - 30,
             top: y + 100,
-            zIndex: 1000,
+            zIndex: 99,
         }}>
           <CardContent>
             <TextField
@@ -1257,12 +1257,12 @@ class QuantumCircuit extends React.PureComponent {
 
         {blockEditCtrls ?
           <Button  color="secondary"
-            onClick={this.onStopCtrlsEdit} style={{left: 500, top: 110, position: 'absolute', zIndex: 10000}}>
+            onClick={this.onStopCtrlsEdit} style={{left: 500, top: 110, position: 'absolute', zIndex: 99}}>
             Stop Edit mode
           </Button>
         : selectedNonMeasureBlock &&
           <Button  color="primary"
-            onClick={this.onStartCtrlsEdit} style={{left: 500, top: 110, position: 'absolute', zIndex: 10000}}>
+            onClick={this.onStartCtrlsEdit} style={{left: 500, top: 110, position: 'absolute', zIndex: 99}}>
             Edit controls
           </Button>
         }

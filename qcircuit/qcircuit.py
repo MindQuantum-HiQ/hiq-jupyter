@@ -13,6 +13,7 @@ class QCircuit(Component):
         #super(QCircuit, self).__init__(target_name='qcircuit', **kwargs)
 
         self.qregs = self._generate_qregs(**kwargs)
+        self.use_text_out_on_run = False
 
         super(QCircuit, self).__init__(target_name='qcircuit', props={
             "circuit": [[""]],
@@ -111,14 +112,13 @@ class QCircuit(Component):
 
 #        print(len(args))
 
-        if (len(args) == 3):
-            print(name2obj['b1'])
-            print(args[1])
+        ret = ""
 
         schema_len = 0
         for line in self.current_schema:
             schema_len = max(schema_len, len(line))
 
+        print(schema_len)
         for x in range(schema_len):
             for y, exp_qreg in enumerate(self._expanded_qregs):
                 if len(self.current_schema[y]) <= x or self.current_schema[y][x] == "": continue
@@ -131,30 +131,45 @@ class QCircuit(Component):
                 gate_op = gates[gate]
 
                 if exp_qreg['type'] == 'QUREG':
-                    op_subject = name2obj[exp_qreg['name']][int(exp_qreg['index'])]
+                    if not self.use_text_out_on_run:
+                        op_subject = name2obj[exp_qreg['name']][int(exp_qreg['index'])]
+                    text_subject = "%s[%s]" % (exp_qreg['name'], exp_qreg['index'])
                 else:
                     op_subject = name2obj[exp_qreg['name']]
+                    text_subject = exp_qreg['name']
 
                 if not ctrls:
-                    gate_op | op_subject
-                    print("Debug: ", gate, " | ", exp_qreg['name'])
+                    if self.use_text_out_on_run:
+                        ret += "\t%s | %s\n" % (gate, text_subject)
+                    else:
+                        gate_op | op_subject
+#                    print("Debug: ", gate, " | ", exp_qreg['name'])
                 else:
                     resolved_ctrls = []
+                    text_resolved_ctrls = []
                     for c_index in ctrls:
                         exp_qreg = self._expanded_qregs[int(c_index)]
                         if exp_qreg['type'] == 'QUREG':
-                            ctrl_obj = name2obj[exp_qreg['name']][exp_qreg['index']]
+                            if not self.use_text_out_on_run:
+                                ctrl_obj = name2obj[exp_qreg['name']][exp_qreg['index']]
+                            text_ctrl_obj = "%s[%s]" % (exp_qreg['name'], exp_qreg['index'])
                         else:
-                            ctrl_obj = name2obj[exp_qreg['name']]
-                            if exp_qreg['name']=='b1':
-                                ctrl_obj = name2obj.get('b1')
+                            ctrl_obj = name2obj[exp_qreg['name']][0]
+                            text_ctrl_obj = "%s[0]" % (exp_qreg['name'])
 
-                        resolved_ctrls.append(ctrl_obj)
-                    print(name2obj, exp_qreg['name'], ctrl_obj)
-                    print("Debug: ", gate, " with Control(", ctrls, ")", ctrl_obj)
+                        if not self.use_text_out_on_run:
+                            resolved_ctrls.append(ctrl_obj)
+                        text_resolved_ctrls.append(text_ctrl_obj)
 
-                    with Control(eng, resolved_ctrls):
-                        gate_op | op_subject
+                    if self.use_text_out_on_run:
+                        ret += "\twith Control(eng, [%s]):\n" % (', '.join(text_resolved_ctrls))
+                        ret += "\t\t%s | %s\n" % (gate, text_subject)
+                    else:
+#                        print(name2obj, exp_qreg['name'], ctrl_obj)
+#                        print("Debug: ", gate, " with Control([", ctrls, "])", ctrl_obj)
+                        with Control(eng, resolved_ctrls):
+                            gate_op | op_subject
+        return ret
 
     def display(self):
         self.send({"action": "pre_display"});
