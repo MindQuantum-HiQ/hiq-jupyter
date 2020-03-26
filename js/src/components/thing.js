@@ -749,7 +749,6 @@ class QuantumCircuit extends React.PureComponent {
     return (
       <div style={{position: 'fixed', bottom: 10, width: '90%', left: 50}}>
         <TextField style={{width: '100%'}}
-         id="outlined-multiline-flexible"
          label={"Quantum code"}
          multiline
          rowsMax="5"
@@ -1278,8 +1277,8 @@ class QuantumCircuit extends React.PureComponent {
                   onClick={this.onSVGClick}
                 >
                   <defs>
-                    <clipPath id="scrollArea1">
-                      <rect id="scrollArea1-rect" x={100} y={0} width={960} height={editorHeight} />
+                    <clipPath id={"scrollArea" + this.state.mainContainerId}>
+                      <rect x={100} y={0} width={960} height={editorHeight} />
                     </clipPath>
                   </defs>
                   <g><g style={{opacity: 0, display: 'none'}} transform="matrix(1,0,0,1,115,2)">
@@ -1290,17 +1289,9 @@ class QuantumCircuit extends React.PureComponent {
 
 
                     {this.renderLabels()}
-{/*                      <g transform="matrix(1.7,0,0,1.7,66.7613,315.7739)"><g id="gSjpf81cb2lj" transform="matrix(1,0,0,1,12.422,0)">
-                        <path d="M4.189,4.454c0-0.797-0.047-1.594-0.393-2.328C3.346,1.158,2.518,1,2.109,1C1.5,1,0.782,1.267,0.359,2.188
-              		C0.048,2.876,0,3.658,0,4.455c0,0.75,0.032,1.641,0.454,2.405c0.422,0.797,1.155,1,1.644,1c0.529,0,1.297-0.203,1.731-1.156
-              		c0.312-0.692,0.36-1.47,0.36-2.253V4.454z M2.098,7.641c-0.393,0-0.981-0.25-1.156-1.203C0.835,5.844,0.835,4.922,0.835,4.331
-              		c0-0.642,0-1.297,0.078-1.828c0.188-1.188,0.938-1.28,1.188-1.28c0.33,0,0.982,0.187,1.172,1.17
-              		c0.107,0.562,0.107,1.312,0.107,1.94c0,0.75,0,1.42-0.107,2.06C3.114,7.346,2.553,7.641,2.1,7.641H2.098z" />
+
                       </g>
-                      <text x={0} y={2} fill="#000000" style={{fontSize: '10px', alignmentBaseline: 'middle', fontFamily: '"Helvetica Neue", HelveticaNeue, HelvRegularIBM, Helvetica, Arial, sans-serif'}}>c</text></g>
-*/}
-                      </g>
-                  <g id="scrollingArea" clipPath="url(#scrollArea1)">
+                  <g id="scrollingArea" clipPath={"url(#scrollArea" + this.state.mainContainerId +")"}>
                     <g>
                       <g>
                         {this.renderGrid()}
