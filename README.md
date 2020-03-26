@@ -1,4 +1,5 @@
 # hiq-jupyter Plug-in
+This is a Jupyter notebook plugin for graphically editing HiQ programs. 
 
 ## Installation
 
@@ -29,5 +30,3 @@ Using mouse draw any circuit schema with UI
 Try to change circuit parameters order or add/delete some or change QuReg size to see updated circuit
 
 ![Jupyter HiQ Plug-in example](docs/resources/circuit_reordered.png "Plug-in example reordered")
-
-
