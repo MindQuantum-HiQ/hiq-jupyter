@@ -16,7 +16,7 @@ class develop(_develop):
 
 setup(name='qcircuit',
       cmdclass={'develop': develop},
-      version='0.2.2',
+      version='0.2.3',
       description='Quantum to notebook!',
       url='https://github.com/savinovalex',
       author='Savinov Alexander',
