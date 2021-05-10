@@ -105,7 +105,7 @@
     "ip": "1.1.5",
     "js-file-download": "^0.4.1",
     "jupyter-react-js": "^0.5.1",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "material-design-icons": "^3.0.1",
     "minimist": "1.2.3",
     "prop-types": "15.6.1",
